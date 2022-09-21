@@ -1,0 +1,38 @@
+results -> message (get id) -> message (get mimeType) -> payload (look at header & body) ->
+
+
+header:
+    Delivered-To
+    Received
+    X-Google-Smtp-Source
+    X-Received
+    ARC-Seal
+    ARC-Message-Signature
+    ARC-Authentication-Results
+    Return-Path
+    Received
+    Received-SPF
+    Authentication-Results
+    DKIM-Signature
+    DKIM-Signature
+    X-Feedback-Id
+    X-Mailgun-Sending-Ip
+    X-Mailgun-Sid
+    Received
+    Sender
+    Date
+    Received
+    From
+    To
+    Message-ID
+    Subject
+    MIME-Version
+    Content-type
+    Content-Transfer-Encoding
+
+    using:
+        From -> email sender
+        Subject -> subject of email
+        Date -> date of recieved transaction
+
+
