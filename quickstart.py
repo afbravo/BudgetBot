@@ -42,24 +42,38 @@ def main():
         # Call the Gmail API
         service = build('gmail', 'v1', credentials=creds)
         results = service.users().messages().list(userId='me',labelIds = ['INBOX']).execute()
-        messages = results.get('messages', [])
-        print(messages[0])
-        msg = service.users().messages().get(userId='me', id=messages[0]['id']).execute()
-        payload = msg['payload']
-        parts = payload.get('parts')[1]
-        data = parts['body']['data']
-        print(base64.urlsafe_b64decode(data.encode('ASCII')))
+        messages = results.get('messages', []) #max length 100
+
+        for i in range(100):
+            msg = service.users().messages().get(userId='me', id=messages[i]['id']).execute()
+            From, Subject, Date = getFromSubjectDate(msg)
+            if From == 'transaccionesbg@bgeneral.com':
+                print("FROM: ", From)
+                print("SUBJECT: ", Subject)
+                print("DATE: ", Date)
+                print("------")
         
 
-        # if not messages:
-        #     print("No messages found.")
-        # else:
-        #     print ("Message snippets:")
-        #     for message in messages:
-        #         msg = service.users().messages().get(userId='me', id=message['id']).execute()
-        #         print(msg['snippet'])
     except:
         pass    
+
+    #from index = 13
+    #subject index = 15
+    #date index = 16
+
+
+def getFromSubjectDate(msg):
+    From = ''
+    Subject = ''
+    Date = ''
+    for index, item in enumerate(msg['payload']['headers']):
+        if item['name'] == 'Subject':
+            Subject = item['value']
+        elif item['name'] == 'From':
+            From = item['value']
+        elif item['name'] == 'Date':
+            Date = item['value']
+    return From, Subject, Date
 
 
 if __name__ == '__main__':
