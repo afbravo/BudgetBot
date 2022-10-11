@@ -9,7 +9,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 import base64
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs4
+from pyparsing import htmlComment
 
 
 # If modifying these scopes, delete the file token.json.
@@ -44,15 +45,25 @@ def main():
         results = service.users().messages().list(userId='me',labelIds = ['INBOX']).execute()
         messages = results.get('messages', []) #max length 100
 
+        found = 0
+        total = 0   
         for i in range(100):
             msg = service.users().messages().get(userId='me', id=messages[i]['id']).execute()
             From, Subject, Date = getFromSubjectDate(msg)
             if From == 'transaccionesbg@bgeneral.com':
-                print("FROM: ", From)
+                html = getEmailHtml(msg)
+                text = getHTMLText(html)
+                money = float(getMoney(text))
+                total += money
+                found += 1
+                print("From: ", From)
                 print("SUBJECT: ", Subject)
                 print("DATE: ", Date)
+                print("MONEY: ", money)
                 print("------")
-        
+
+        # print("Found: ", found)
+        # print("Total: ", total)
 
     except:
         pass    
@@ -60,6 +71,25 @@ def main():
     #from index = 13
     #subject index = 15
     #date index = 16
+
+def getMoney(text):
+    for i in text:
+        if i[0] == '$':
+            return i[1:]
+
+
+def getHTMLText(html):
+    soup = bs4(html, 'html.parser')
+    #find the money amount
+    text = soup.get_text()
+    text = text.replace('\\r', '').replace('\\n', '').replace('\\t', '').replace(' ', ',')
+    text = text.split(',')
+    text = [x for x in text if x != '']
+    return text
+
+
+def getEmailHtml(msg):
+    return base64.urlsafe_b64decode(msg['payload']['body']['data'])
 
 
 def getFromSubjectDate(msg):
